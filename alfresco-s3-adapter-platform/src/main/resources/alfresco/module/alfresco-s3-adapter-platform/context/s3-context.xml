@@ -45,19 +45,6 @@
     <property name="cache" ref="redpill.defaultS3ContentCache"/>
     <property name="cleaner" ref="redpill.defaultS3CachedContentCleaner"/>
   </bean>
-  
-  <bean id="redpill.defaultS3CachingContentStoreCleanerJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
-    <property name="jobClass">
-      <value>org.alfresco.repo.content.caching.cleanup.CachedContentCleanupJob</value>
-    </property>
-    <property name="jobDataAsMap">
-      <map>
-        <entry key="cachedContentCleaner">
-          <ref bean="redpill.defaultS3CachedContentCleaner" />
-        </entry>
-      </map>
-    </property>
-  </bean>
 
   <bean id="redpill.defaultS3CachedContentCleaner"
         class="org.alfresco.repo.content.caching.cleanup.CachedContentCleaner"
@@ -68,16 +55,27 @@
     <property name="usageTracker" ref="redpill.defaultS3QuotaManager"/>
   </bean>
 
-  <bean id="redpill.defaultS3CachingContentStoreCleanerTrigger" class="org.alfresco.util.CronTriggerBean">
-    <property name="jobDetail">
-      <ref bean="redpill.defaultS3CachingContentStoreCleanerJobDetail" />
-    </property>
-    <property name="scheduler">
-      <ref bean="schedulerFactory" />
-    </property>
-    <property name="cronExpression">
-      <value>${system.content.caching.contentCleanup.cronExpression}</value>
-    </property>
+  <bean id="redpill.defaultS3CachingContentStoreCleanerTrigger" class="org.alfresco.schedule.AlfrescoSchedulerAccessorBean">
+      <property name="scheduler" ref="schedulerFactory"/>
+      <property name="triggers">
+          <list>
+              <bean id="feedCleanerTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+                  <property name="cronExpression" value="${system.content.caching.contentCleanup.cronExpression}"/>
+                  <!-- <property name="startDelay" value="${activities.feed.cleaner.startDelayMilliseconds}"/> -->
+                  <property name="jobDetail" ref="redpill.defaultS3CachingContentStoreCleanerJobDetail"/>
+              </bean>
+          </list>
+      </property>
+      <!-- <property name="enabled" value="${activities.feed.cleaner.enabled}" /> -->
+  </bean>
+    
+  <bean id="redpill.defaultS3CachingContentStoreCleanerJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+      <property name="jobClass" value="org.alfresco.repo.content.caching.cleanup.CachedContentCleanupJob"/>
+      <property name="jobDataAsMap">
+          <map>
+              <entry key="cachedContentCleaner" value-ref="redpill.defaultS3CachedContentCleaner"/>
+          </map>
+      </property>
   </bean>
 
   <!-- The s3 content store -->
@@ -95,4 +93,12 @@
     <property name="multipartUploadThreshold" value="${aws.s3.client.multipartUploadThreshold}"/>
   </bean>
 
+  <!--  Caching Content Store -->
+  <bean id="fileContentStore" class="org.alfresco.repo.content.caching.CachingContentStore" init-method="init">
+    <property name="backingStore" ref="redpill.defaultS3ContentStore"/>
+    <property name="cache" ref="redpill.defaultS3ContentCache"/>
+    <property name="cacheOnInbound" value="${system.content.caching.cacheOnInbound}"/>
+    <property name="quota" ref="redpill.defaultS3QuotaManager" />
+  </bean>
+  
 </beans>
