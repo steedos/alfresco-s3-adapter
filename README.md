@@ -10,9 +10,11 @@ This project is meant to provide tools to use s3 as a storage solution for Alfre
  * Uses Alfresco SDK 3.0 and tested with Alfresco 5.2
  * Pull Requests / Issues / Contributions are welcomed!
  * Use Findify s3mock for testing
+ * Steedos: Uses Alfresco SDK 4.0 and tested with Alfresco 6.1
  
 ## Build Instructions
 
+ * Must build with java <= 1.8
  * After cloning the project, run `mvn clean install` to download dependencies and build the project.
 
 ## Installation
