@@ -63,6 +63,7 @@ public class S3ContentStore extends AbstractContentStore
   private int maxErrorRetry = 5;
   private long connectionTTL = 60000L;
   private long multipartUploadThreshold = 16777216L;
+  private boolean withPathStyleAccessEnabled = true;
 
   /**
    * @see
@@ -158,6 +159,7 @@ public class S3ContentStore extends AbstractContentStore
       AmazonS3ClientBuilder s3builder = AmazonS3ClientBuilder
               .standard()
               .withEndpointConfiguration(endpointConf)
+              .withPathStyleAccessEnabled(this.withPathStyleAccessEnabled)
               .withCredentials(new AWSStaticCredentialsProvider(credentials))
               .withClientConfiguration(clientConfiguration);
       s3Client = s3builder.build();
@@ -365,5 +367,9 @@ public class S3ContentStore extends AbstractContentStore
     Assert.isTrue(connectionTTL >= 0);
     Assert.isTrue(connectionTimeout >= 0);
     Assert.isTrue(multipartUploadThreshold >= 0);
+  }
+
+  public void setWithPathStyleAccessEnabled(boolean withPathStyleAccessEnabled) {
+    this.withPathStyleAccessEnabled = withPathStyleAccessEnabled;
   }
 }
