@@ -86,7 +86,11 @@ public class S3ContentReader extends AbstractContentReader implements AutoClosea
         if (LOG.isDebugEnabled()) {
           LOG.debug("GETTING OBJECT METADATA - BUCKET: " + bucket + " KEY: " + key);
         }
-        s3ObjectMetadata = s3Client.getObjectMetadata(bucket, key);
+        try {
+          s3ObjectMetadata = s3Client.getObjectMetadata(bucket, key);
+        } catch(Exception e){
+          LOG.error(e);
+        }
       }
     }
   }
